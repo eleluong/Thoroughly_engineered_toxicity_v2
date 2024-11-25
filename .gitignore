@@ -1,0 +1,7 @@
+.env
+__pycache__
+evaluation_results
+.ipynb_checkpoints
+chroma_small
+result 
+toxic_prompts.ipynb
