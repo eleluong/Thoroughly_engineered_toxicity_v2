@@ -8,9 +8,12 @@ from pydantic import BaseModel
 import os
 import argparse
 import time
+from config import settings
+
 
 model_name = "BAAI/bge-small-en-v1.5"
-model_save_path = "/home/tinh/llama2/TET_v2/output/ct2_distilled_small"
+# model_save_path =
+model_save_path = settings.ct2_encoder_path
 # model_path = "bge_model_ctranslate2_base"
 
 
