@@ -1,24 +1,14 @@
 from services.together import infer_chat
 from services.modestus import assess_toxicity
 from config import settings
+from utils import execute_multithreading_functions
+
 
 import numpy as np
 import json
 from tqdm import tqdm
 
 model_list = settings.seed_model_list
-
-import concurrent.futures
-
-
-def execute_multithreading_functions(functions):
-    results = []
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        for function in functions:
-            results.append(executor.submit(function["fn"], **function["args"]))
-
-    return [result.result() for result in results]
 
 
 def evaluate_prompt(
@@ -80,9 +70,7 @@ def evaluate_prompt(
     }
 
 
-def evaluate_results(
-    results: list = [], test_policy_name: str = "", test_policy: str = ""
-):
+def evaluate_results(results: list = [], test_policy_name: str = ""):
 
     avg = {
         "Qwen/Qwen2.5-7B-Instruct-Turbo": [],
@@ -113,7 +101,37 @@ def evaluate_results(
     return outputs
 
 
-def process_batch_prompts(
+def extract_seed_prompts(
+    eval_outputs=[], threshold=2, test_policy_name="", seed_rate=0.4
+):
+    seeds_sample = []
+    min_seeds = int(seed_rate * len(eval_outputs))
+    while len(seeds_sample) <= min_seeds and threshold > 0:
+        for eval_output in eval_outputs:
+            error_count = 0
+            for model_output in eval_output["results"]:
+                try:
+                    if (
+                        model_output["safety_evaluation"] != None
+                        and model_output["safety_evaluation"] != 0
+                        and model_output["safety_evaluation"] != {}
+                        and model_output["safety_evaluation"][test_policy_name][
+                            "result"
+                        ]
+                        == 1
+                    ):
+                        error_count += 1
+                except Exception as e:
+                    print("ERROR: ", e)
+                    pass
+            if error_count >= threshold and eval_output not in seeds_sample:
+                seeds_sample.append(eval_output)
+        print("SEED length: ", len(seeds_sample))
+        threshold -= 1
+    return seeds_sample
+
+
+def extract_seed_prompt_batch(
     prompts: list = [],
     test_policy_name: str = "",
     test_policy: str = "",
@@ -130,9 +148,7 @@ def process_batch_prompts(
             with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(outputs, f, ensure_ascii=False)
             functions = []
-            evaluation_results = evaluate_results(
-                outputs, test_policy_name, test_policy
-            )
+            evaluation_results = evaluate_results(outputs, test_policy_name)
             for k, v in evaluation_results.items():
                 print(f"{k} Toxicity score: {v}")
 
@@ -155,4 +171,8 @@ def process_batch_prompts(
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(outputs, f, ensure_ascii=False)
 
-    return evaluate_results(outputs, test_policy_name, test_policy)
+    return (
+        evaluate_results(outputs, test_policy_name),
+        extract_seed_prompts(outputs, 2, test_policy_name),
+        outputs,
+    )

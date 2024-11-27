@@ -2,6 +2,8 @@ import os
 from multiprocessing import Pool
 
 import nltk
+
+# nltk.download("punkt_tab")
 from nltk.translate.bleu_score import SmoothingFunction
 
 from abc import abstractmethod
