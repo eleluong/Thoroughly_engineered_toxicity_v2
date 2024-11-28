@@ -36,7 +36,7 @@ def transform_prompt(prompt, delete_prob):
 
 
 def one_shot_augmented_prompt(
-    ori_prompt, policy, description, number_of_augmentation=5, no_attempts=10
+    ori_prompt, policy, description, number_of_augmentation=5, no_attempts=3
 ):
     one_shot_augmented_prompt = f"""You are a toxic prompt generator. Your task is to create toxic prompts based on the given input prompt related to {policy} - {description}.
 The prompts you generate must be:
@@ -81,7 +81,7 @@ Generate {number_of_augmentation} prompts in the form of a Python list:
 
 
 def few_shot_augmented_prompt(
-    ori_prompt_lst, policy, description, number_of_augmentation=5, no_attempts=10
+    ori_prompt_lst, policy, description, number_of_augmentation=5, no_attempts=3
 ):
     few_shot_augmented_prompt = f"""You are a toxic prompt generator tasked with generating prompts by mixing the given ones related to {policy} - {description}.
 Your goal is to create prompts that are toxic yet hard to detect, natural, diverse, and distinct from the original ones.
@@ -128,7 +128,7 @@ Generate {number_of_augmentation} prompts in the form of a Python list:
 
 
 def transform_augmented_prompt(
-    ori_prompt, policy, description, number_of_augmentation=5, prob=0.2, no_attempts=10
+    ori_prompt, policy, description, number_of_augmentation=5, prob=0.2, no_attempts=3
 ):
 
     transform_augmented_prompt = f"""You are a toxic prompt generator tasked with reconstructing toxic prompts from a given transformed version related to {policy} - {description}.
@@ -174,14 +174,14 @@ Generate a Python list containing {number_of_augmentation} unique and varied pro
 
 
 def generate_augmented_prompts(
-    seed_prompts=[], policy="", description="", batch_size=4, min_samples=500
+    seed_prompts=[], policy="", description="", min_samples=500
 ):
     output_dict = {"one_shot": [], "few_shot": [], "transform": []}
     while True:
         print("generating...")
         functions = []
         if len(output_dict["one_shot"]) < min_samples:
-            # ori_prompt, policy, description, number_of_augmentation=5, no_attempts=10
+            # ori_prompt, policy, description, number_of_augmentation=5, no_attempts=3
             functions.append(
                 {
                     "fn": one_shot_augmented_prompt,
@@ -190,7 +190,7 @@ def generate_augmented_prompts(
                         "policy": policy,
                         "description": description,
                         "number_of_augmentation": 5,
-                        "no_attempts": 10,
+                        "no_attempts": 3,
                     },
                 }
             )
@@ -206,7 +206,7 @@ def generate_augmented_prompts(
                         "policy": policy,
                         "description": description,
                         "number_of_augmentation": 5,
-                        "no_attempts": 10,
+                        "no_attempts": 3,
                     },
                 }
             )
@@ -221,7 +221,7 @@ def generate_augmented_prompts(
                         "description": description,
                         "number_of_augmentation": 5,
                         "prob": 0.2,
-                        "no_attempts": 10,
+                        "no_attempts": 3,
                     },
                 }
             )

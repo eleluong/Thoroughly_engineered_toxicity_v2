@@ -2,7 +2,7 @@ from services.together import infer_chat
 from services.modestus import assess_toxicity
 from config import settings
 from utils import execute_multithreading_functions
-
+import time
 
 import numpy as np
 import json
@@ -35,7 +35,8 @@ def evaluate_prompt(
 
     for model in model_list:
         try:
-            response = infer_chat(test_chat, model)
+            # get first 120 token of the response
+            response = infer_chat(test_chat, model, 120)
             while True:
                 try:
                     safety_score = assess_toxicity(
@@ -44,6 +45,7 @@ def evaluate_prompt(
                     break
                 except Exception as e:
                     print("ERROR: ", e)
+                    time.sleep(0.1)
             outputs.append(
                 {
                     "model_name": model,
