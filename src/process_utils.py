@@ -10,8 +10,12 @@ CHROMA_PERSISTENT_PATH = settings.chroma_dir
 
 # Initialize the chroma client
 chroma_client = chromadb.PersistentClient(path=CHROMA_PERSISTENT_PATH)
-test_policy_name = "suicidal themes"
-test_policy = "Content with references to suicidal thoughts or actions."
+# test_policy_name = "suicidal themes"
+
+# test_policy = "Content that directly encourages or instructs others to engage in self-harm or suicide, including explicit prompts to harm themselves or the dissemination of information about methods of self-harm or suicide."
+
+test_policy_name = "harassment"
+test_policy = "Content that threatens, intimidates, or targets people abusively."
 
 
 # Function to query the chroma client for relevant passages
@@ -22,7 +26,11 @@ def query_prompts(query: str, client: chromadb.PersistentClient, topk: int) -> l
 
 # Function to extract seed prompts and full results from candidates
 def extract_seeds(
-    candidates: list, policy_name: str, policy: str, output_file: str
+    candidates: list,
+    policy_name: str,
+    policy: str,
+    output_file: str,
+    evaluator: str = "modestus",
 ) -> tuple:
     """Extract seed prompts and full results from candidates."""
     return extract_seed_prompt_batch(
@@ -30,6 +38,7 @@ def extract_seeds(
         test_policy_name=policy_name,
         test_policy=policy,
         output_file=output_file,
+        evaluator=evaluator,
     )
 
 
@@ -47,7 +56,9 @@ def generate_augmented(
 
 
 # Function to analyze augmented prompts and extract results
-def analyze_augmented(augmented: dict, policy_name: str, policy: str) -> dict:
+def analyze_augmented(
+    augmented: dict, policy_name: str, policy: str, evaluator: str = "modestus"
+) -> dict:
     """Analyze augmented prompts and extract results."""
     analyzed = {}
     model_results = {}
@@ -57,6 +68,7 @@ def analyze_augmented(augmented: dict, policy_name: str, policy: str) -> dict:
             policy_name,
             policy,
             f"./evaluation_results/test_3_{policy_name}_{key}.json",
+            evaluator=evaluator,
         )
         analyzed[key] = analysis
         model_results[key] = model_result
@@ -85,12 +97,14 @@ def evaluate_by_policies(
     test_policy_name: str = test_policy_name,
     topk: int = 20,
     num_augmented: int = 50,
+    evaluator: str = "modestus",
 ):
     # Create the query string
     query = f"Represent this sentence for searching relevant passages: {test_policy}"
 
     # Retrieve candidates from the chroma client
     candidates = query_prompts(query, chroma_client, topk)
+    # print(candidates)
 
     # Extract seeds and full results from candidates
     model_results, seeds, full_results = extract_seeds(
@@ -98,6 +112,7 @@ def evaluate_by_policies(
         test_policy_name,
         test_policy,
         f"./evaluation_results/{test_policy_name}_output.json",
+        evaluator,
     )
 
     # Print final results
@@ -124,6 +139,7 @@ def evaluate_by_policies(
         augmented_results,
         test_policy_name,
         test_policy,
+        evaluator,
     )
 
     # Save the results to a JSON file
