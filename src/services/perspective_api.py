@@ -8,7 +8,7 @@ from config import settings
 API_KEY = settings.google_api_key
 
 
-def assess_toxicity_perspective_api(resp=""):
+def assess_toxicity_perspective_api(resp="", policy_name=""):
     # Define the URL and headers
     url = f"https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key={API_KEY}"
     headers = {"Content-Type": "application/json"}
@@ -41,5 +41,8 @@ def assess_toxicity_perspective_api(resp=""):
                 "result": response_json["attributeScores"][i]["summaryScore"]["value"]
             }
         return output
-    else:
+    elif response.status_code == 429:
         raise Exception(f"Error: {response.status_code} - {response.text}")
+    else:
+        output = {}
+        output[policy_name.lower().replace("_", " ")] = {"result": None}

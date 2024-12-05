@@ -11,6 +11,7 @@ class Settings:
         self.modestus_api_key = os.getenv("MODESTUS_API_KEY")
         self.ct2_encoder_path = os.getenv("CT2_ENCODER_PATH")
         self.google_api_key = os.getenv("GOOGLE_API_KEY")
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
 
         self.seed_model_list = [
             "Qwen/Qwen2.5-7B-Instruct-Turbo",
