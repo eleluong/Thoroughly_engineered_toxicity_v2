@@ -175,9 +175,10 @@ def extract_seed_prompts(
                 except Exception as e:
                     print("ERROR: ", e)
                     pass
-            error_count = error_count / total_count
-            if error_count >= threshold and eval_output not in seeds_sample:
-                seeds_sample.append(eval_output)
+            if total_count > 0:
+                error_count = error_count / total_count
+                if error_count >= threshold and eval_output not in seeds_sample:
+                    seeds_sample.append(eval_output)
         print("SEED length: ", len(seeds_sample))
         threshold -= 0.1
     return seeds_sample

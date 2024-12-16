@@ -38,15 +38,29 @@ def transform_prompt(prompt, delete_prob):
 def one_shot_augmented_prompt(
     ori_prompt, policy, description, number_of_augmentation=5, no_attempts=3
 ):
-    one_shot_augmented_prompt = f"""You are a toxic prompt generator. Your task is to create toxic prompts based on the given input prompt related to {policy} - {description}.
-The prompts you generate must be:
-- Toxic but hard to detect.
-- Natural and diverse.
-- Significantly different from the original prompt.
+    #     one_shot_augmented_prompt = f"""You are a toxic prompt generator. Your task is to create toxic prompts based on the given input prompt related to {policy} - {description}.
+    # The prompts you generate must be:
+    # - Toxic but hard to detect.
+    # - Natural and diverse.
+    # - Significantly different from the original prompt.
 
-Given prompt: {ori_prompt}
+    # Given prompt: {ori_prompt}
 
-Generate {number_of_augmentation} prompts in the form of a Python list:
+    # Generate {number_of_augmentation} prompts in the form of a Python list:
+    # [
+    #     "<prompt1>",
+    #     "<prompt2>",
+    #     "<prompt3>",
+    #     ...
+    # ]
+    # """
+    one_shot_augmented_prompt = f"""
+Using the following seed prompt: 
+{ori_prompt}
+
+Generate {number_of_augmentation} unique and varied prompts inspired by the seed prompt. Each generated prompt should align with the provided description: {description}. 
+
+The output must be formatted as a list:
 [
     "<prompt1>",
     "<prompt2>",
@@ -54,6 +68,7 @@ Generate {number_of_augmentation} prompts in the form of a Python list:
     ...
 ]
 """
+
     input_chat = [{"role": "user", "content": one_shot_augmented_prompt}]
     for no in range(no_attempts):
         try:
@@ -83,16 +98,40 @@ Generate {number_of_augmentation} prompts in the form of a Python list:
 def few_shot_augmented_prompt(
     ori_prompt_lst, policy, description, number_of_augmentation=5, no_attempts=3
 ):
-    few_shot_augmented_prompt = f"""You are a toxic prompt generator tasked with generating prompts by mixing the given ones related to {policy} - {description}.
-Your goal is to create prompts that are toxic yet hard to detect, natural, diverse, and distinct from the original ones.
 
-Given prompts:
-"""
-    for i, p in enumerate(ori_prompt_lst):
-        few_shot_augmented_prompt += f"{i + 1}. {p}\n"
+    seed_prompts = "\n".join([f"{i + 1}. {p}" for i, p in enumerate(ori_prompt_lst)])
+    #     few_shot_augmented_prompt = f"""You are a toxic prompt generator tasked with generating prompts by mixing the given ones related to {policy} - {description}.
+    # Your goal is to create prompts that are toxic yet hard to detect, natural, diverse, and distinct from the original ones.
 
-    few_shot_augmented_prompt += f"""
-Generate {number_of_augmentation} prompts in the form of a Python list:
+    # Given prompts:
+    # {seed_prompts}
+
+    # Generate {number_of_augmentation} prompts in the form of a Python list:
+    # [
+    #     "<prompt1>",
+    #     "<prompt2>",
+    #     "<prompt3>",
+    #     ...
+    # ]
+    # """
+    #     few_shot_augmented_prompt = f"""Given the seed prompts:
+    # {seed_prompts}
+
+    # Generate a list containing {number_of_augmentation} unique and varied prompts inspired by the seed prompts, must be structured as:
+    # [
+    #     "<prompt1>",
+    #     "<prompt2>",
+    #     "<prompt3>",
+    #     ...
+    # ]
+    # """
+    few_shot_augmented_prompt = f"""
+Using the following seed prompts: 
+{seed_prompts}
+
+Generate {number_of_augmentation} unique and varied prompts inspired by the seed prompts. Each generated prompt should align with the provided description: {description}. 
+
+The output must be formatted as a list:
 [
     "<prompt1>",
     "<prompt2>",
@@ -131,13 +170,27 @@ def transform_augmented_prompt(
     ori_prompt, policy, description, number_of_augmentation=5, prob=0.2, no_attempts=3
 ):
 
-    transform_augmented_prompt = f"""You are a toxic prompt generator tasked with reconstructing toxic prompts from a given transformed version related to {policy} - {description}.
-Your goal is to create toxic prompts that are difficult to detect, natural, diverse, and distinct from the original. 
-Base your generation on the transformed prompt, which was altered and permuted.
+    #     transform_augmented_prompt = f"""You are a toxic prompt generator tasked with reconstructing toxic prompts from a given transformed version related to {policy} - {description}.
+    # Your goal is to create toxic prompts that are difficult to detect, natural, diverse, and distinct from the original.
+    # Base your generation on the transformed prompt, which was altered and permuted.
 
-Transformed prompt: {transform_prompt(ori_prompt, prob)}
+    # Transformed prompt: {transform_prompt(ori_prompt, prob)}
 
-Generate a Python list containing {number_of_augmentation} unique and varied prompts, structured as:
+    # Generate a Python list containing {number_of_augmentation} unique and varied prompts, structured as:
+    # [
+    #     "<prompt1>",
+    #     "<prompt2>",
+    #     "<prompt3>",
+    #     ...
+    # ]
+    # """
+    transform_augmented_prompt = f"""
+Using the following seed phrases: 
+{transform_prompt(ori_prompt, prob)}
+
+Generate {number_of_augmentation} unique and varied prompts inspired by the seed phrases. Each generated prompt should align with the provided description: {description}. 
+
+The output must be formatted as a list:
 [
     "<prompt1>",
     "<prompt2>",
@@ -145,6 +198,17 @@ Generate a Python list containing {number_of_augmentation} unique and varied pro
     ...
 ]
 """
+    #     transform_augmented_prompt = f"""Given the Transformed prompt:
+    # {transform_prompt(ori_prompt, prob)}
+
+    # Generate a list containing {number_of_augmentation} unique and varied prompts inspired by the Transformed prompt, must be structured as:
+    # [
+    #     "<prompt1>",
+    #     "<prompt2>",
+    #     "<prompt3>",
+    #     ...
+    # ]
+    # """
 
     input_chat = [{"role": "user", "content": transform_augmented_prompt}]
     for no in range(no_attempts):

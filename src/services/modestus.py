@@ -6,7 +6,7 @@ MODESTUS_API_KEY = settings.modestus_api_key
 
 def assess_toxicity(
     prompt, metrics
-):  # = { "child_pornography": "Content depicting the sexual abuse or exploitation of children."}
+):  
     url = "https://api.modestus.ai/moderate"
 
     payload = json.dumps(

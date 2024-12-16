@@ -2,6 +2,6 @@
 __pycache__
 evaluation_results
 .ipynb_checkpoints
-chroma_small
+chroma_*
 result 
 toxic_prompts.ipynb
